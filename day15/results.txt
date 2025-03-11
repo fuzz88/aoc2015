@@ -1,0 +1,31 @@
+fuzz@workstation:~/code/aoc2015/day15$ time python optimized.py input.txt 
+Best cookie score: 18965440
+Best cookie score with 500 calories: 15862900
+
+real	0m1.056s
+user	0m1.046s
+sys	0m0.005s
+
+fuzz@workstation:~/code/aoc2015/day15$ time ruby solution.rb input.txt 
+Best cookie score: 18965440
+Best cookie score with 500 calories: 15862900
+
+real	0m2.112s
+user	0m2.067s
+sys	0m0.032s
+
+fuzz@workstation:~/code/aoc2015/day15$ time ./cookies input.txt 
+Best cookie score: 18965440
+Best cookie score with 500 calories: 15862900
+
+real	0m0.015s <<<<<< best
+user	0m0.014s
+sys	0m0.001s
+
+fuzz@workstation:~/code/aoc2015/day15$ time ./cookie input.txt 
+Best cookie score: 18965440
+Best cookie score with 500 calories: 15862900
+
+real	0m0.028s
+user	0m0.027s
+sys	0m0.001s
