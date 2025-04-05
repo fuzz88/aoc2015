@@ -2,7 +2,9 @@ use std::collections::HashMap;
 use std::fs;
 use std::io;
 
-fn read_input(file_path: &str) -> Result<Vec<HashMap<String, u32>>, io::Error> {
+type Fingerprint = HashMap<String, u32>;
+
+fn read_input(file_path: &str) -> Result<Vec<Fingerprint>, io::Error> {
     let mut aunts = Vec::new();
 
     for line in fs::read_to_string(file_path)?.lines() {
@@ -27,18 +29,35 @@ fn read_input(file_path: &str) -> Result<Vec<HashMap<String, u32>>, io::Error> {
     Ok(aunts)
 }
 
-fn read_fingerprint(fingerprint_path: &str) -> Result<HashMap<String, u32>, io::Error> {
+fn read_fingerprint(fingerprint_path: &str) -> Result<Fingerprint, io::Error> {
     let mut fingerprint = HashMap::new();
+
     for line in fs::read_to_string(fingerprint_path)?.lines() {
         let mut parts = line.split_whitespace();
         if let (Some(compound), Some(kinds)) = (parts.next(), parts.next()) {
             if let Ok(kinds) = kinds.parse::<u32>() {
-                fingerprint.insert(compound.to_string(), kinds);
+                fingerprint.insert(compound.trim_end_matches(":").to_string(), kinds);
             }
         }
     }
 
     Ok(fingerprint)
+}
+
+fn detect_aunt(fingerprint: Fingerprint, aunts: Vec<Fingerprint>) -> Option<usize> {
+    'aunt_loop: for (index, aunt) in aunts.into_iter().enumerate() {
+        'fingerprint_loop: for (fp_name, fp_value) in &fingerprint {
+            if let Some(value) = aunt.get(fp_name) {
+                if fp_value != value {
+                    continue 'aunt_loop;
+                }
+            } else {
+                continue 'fingerprint_loop;
+            }
+        }
+        return Some(index);
+    }
+    None
 }
 
 fn main() {
@@ -50,6 +69,5 @@ fn main() {
     let file_path = "input.txt";
     let input = read_input(file_path).unwrap();
 
-    println!("{:#?}", input);
-    println!("Sue count: {}", input.len());
+    println!("{}", detect_aunt(fingerprint, input).unwrap() + 1);
 }
