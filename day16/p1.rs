@@ -44,20 +44,38 @@ fn read_fingerprint(fingerprint_path: &str) -> Result<Fingerprint, io::Error> {
     Ok(fingerprint)
 }
 
-fn detect_aunt(fingerprint: Fingerprint, aunts: Vec<Fingerprint>) -> Option<usize> {
-    'aunt_loop: for (index, aunt) in aunts.into_iter().enumerate() {
-        'fingerprint_loop: for (fp_name, fp_value) in &fingerprint {
-            if let Some(value) = aunt.get(fp_name) {
-                if fp_value != value {
-                    continue 'aunt_loop;
-                }
-            } else {
-                continue 'fingerprint_loop;
-            }
-        }
-        return Some(index);
-    }
-    None
+fn detect_aunt_part1(fingerprint: &Fingerprint, aunts: &Vec<Fingerprint>) -> Option<usize> {
+    aunts
+        .into_iter()
+        .enumerate()
+        .find(|(_, aunt)| {
+            fingerprint
+                .iter()
+                .all(|(fp_name, fp_value)| match aunt.get(fp_name) {
+                    Some(value) => value == fp_value,
+                    None => true,
+                })
+        })
+        .map(|(index, _)| index)
+}
+
+fn detect_aunt_part2(fingerprint: &Fingerprint, aunts: &Vec<Fingerprint>) -> Option<usize> {
+    aunts
+        .into_iter()
+        .enumerate()
+        .find(|(_, aunt)| {
+            fingerprint
+                .iter()
+                .all(|(fp_name, fp_value)| match aunt.get(fp_name) {
+                    Some(value) => match fp_name.as_str() {
+                        "cats" | "trees" => value > fp_value,
+                        "pomeranians" | "goldfish" => value < fp_value,
+                        _ => value == fp_value,
+                    },
+                    None => true,
+                })
+        })
+        .map(|(index, _)| index)
 }
 
 fn main() {
@@ -69,5 +87,6 @@ fn main() {
     let file_path = "input.txt";
     let input = read_input(file_path).unwrap();
 
-    println!("{}", detect_aunt(fingerprint, input).unwrap() + 1);
+    println!("{}", detect_aunt_part1(&fingerprint, &input).unwrap() + 1);
+    println!("{}", detect_aunt_part2(&fingerprint, &input).unwrap() + 1);
 }
