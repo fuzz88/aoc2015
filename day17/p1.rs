@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::cmp::{Ordering};
 use std::env;
 use std::fs;
 use std::io;
@@ -35,9 +35,56 @@ fn step_by_container(
     count
 }
 
-fn count_placements(containers: Vec<u32>, total_volume: u32) -> u32 {
-    let solution: Vec<usize> = Vec::new();
-    step_by_container(solution, &containers, 0, total_volume)
+fn step_by_container_min(
+    solution: Vec<usize>,
+    containers: &Vec<u32>,
+    current_index: usize,
+    total_volume: u32,
+    min_len: &mut usize,
+    compensator: &mut i32,
+) -> i32 {
+    let mut count: i32 = 0;
+    for index in current_index..containers.len() {
+        if !solution.contains(&index) {
+            let mut solution = solution.clone();
+            solution.push(index);
+            let volume: u32 = solution.iter().map(|index| containers[*index]).sum();
+            count = count
+                + match volume.cmp(&total_volume) {
+                    Ordering::Greater => 0,
+                    Ordering::Equal => {
+                        let mut compensate = false;
+                        if *min_len > solution.len() {
+                            if *min_len != usize::MAX {
+                                compensate = true;
+                            }
+                            *min_len = solution.len();
+                        }
+                        if solution.len() == *min_len {
+                            if compensate {
+                                let ret = *compensator;
+                                *compensator = 1;
+                                -(ret - 1)
+                            } else {
+                                *compensator += 1;
+                                1
+                            }
+                        } else {
+                            0
+                        }
+                    },
+                    Ordering::Less => step_by_container_min(solution, containers, index, total_volume, min_len, compensator),
+                };
+        }
+    }
+    count
+}
+
+fn count_placements(containers: Vec<u32>, total_volume: u32) -> (u32, i32) {
+    (
+        step_by_container(Vec::new(), &containers, 0, total_volume),
+        step_by_container_min(Vec::new(), &containers, 0, total_volume, &mut usize::MAX.clone(), &mut 0.clone()),
+    )
 }
 
 fn main() {
@@ -47,13 +94,10 @@ fn main() {
         let input = read_input(input_file).unwrap();
         let volume: u32 = args[2].parse().unwrap();
 
-        println!("Containers count: {}", input.len());
-        println!("Liters of eggnog: {}", volume);
+        println!("{}", input.len());
+        println!("{}", volume);
 
-        println!(
-            "Different combination of containers: {}",
-            count_placements(input, volume)
-        );
+        println!("{:?}", count_placements(input, volume));
     } else {
         println!("ERROR: no input params");
     }
