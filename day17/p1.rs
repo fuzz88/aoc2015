@@ -17,39 +17,27 @@ fn step_by_container(
     containers: &Vec<u32>,
     current_index: usize,
     total_volume: u32,
-    count: &mut u32,
 ) -> u32 {
+    let mut count: u32 = 0;
     for index in current_index..containers.len() {
         if !solution.contains(&index) {
             let mut solution = solution.clone();
             solution.push(index);
             let volume: u32 = solution.iter().map(|index| containers[*index]).sum();
-            match volume.cmp(&total_volume) {
-                Ordering::Greater => {}
-                Ordering::Equal => {
-                    *count += 1;
-                    println!(
-                        "{:?}",
-                        solution
-                            .iter()
-                            .map(|index| containers[*index])
-                            .collect::<Vec<u32>>()
-                    );
-                    println!("{:?}\n", solution);
-                }
-                Ordering::Less => {
-                    step_by_container(solution, containers, index, total_volume, count);
-                }
-            };
+            count = count
+                + match volume.cmp(&total_volume) {
+                    Ordering::Greater => 0,
+                    Ordering::Equal => 1,
+                    Ordering::Less => step_by_container(solution, containers, index, total_volume),
+                };
         }
     }
-    *count
+    count
 }
 
 fn count_placements(containers: Vec<u32>, total_volume: u32) -> u32 {
     let solution: Vec<usize> = Vec::new();
-    let count: &mut u32 = &mut 0;
-    step_by_container(solution, &containers, 0, total_volume, count)
+    step_by_container(solution, &containers, 0, total_volume)
 }
 
 fn main() {
