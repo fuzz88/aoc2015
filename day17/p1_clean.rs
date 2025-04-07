@@ -54,7 +54,7 @@ fn count_placements(containers: &[u32], total_volume: u32) -> (u32, i32) {
         match solution.len().cmp(&min_len) {
             Ordering::Less => {
                 min_len = solution.len();
-                min_count = 1;
+                min_count = 1; // have this idea at first, but implementation drive me to "compensator stuff"
             },
             Ordering::Equal => {
                 min_count += 1;
